@@ -14,7 +14,7 @@ public class Login_Test extends ActivityInstrumentationTestCase2<LoginActivity> 
     /**
      * Some useful delay/timer values.
      */
-    public static int MILLISECOND = 100;
+    public static int MILLISECOND = 500;
     public static int shortDelay = 2 * MILLISECOND;
     public static int mediumDelay = 5 * MILLISECOND;
     public static int longDelay = 10 * MILLISECOND;

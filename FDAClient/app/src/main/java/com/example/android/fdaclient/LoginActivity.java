@@ -8,6 +8,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -31,9 +32,7 @@ public class LoginActivity extends Activity {
         e2 = (EditText) findViewById(R.id.pass);
         error = (TextView) findViewById(R.id.wrongLogin);
 
-        String username = e1.getText().toString();
-        String password = e2.getText().toString();
-        Login.setOnClickListener(makeLoginOnClickListener(this,username,password));
+        Login.setOnClickListener(makeLoginOnClickListener(this));
         newUser.setOnClickListener(makeNewUserOnClickListener(this));
 
     }
@@ -47,11 +46,12 @@ public class LoginActivity extends Activity {
         };
     }
 
-    private View.OnClickListener makeLoginOnClickListener(final Context context,final String user,
-                                                          final String pass) {
+    private View.OnClickListener makeLoginOnClickListener(final Context context) {
         return new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                String user = e1.getText().toString();
+                String pass = e2.getText().toString();
                 if(valid(user,pass))
                 startActivity(new Intent (context, StudyActivity.class));
 
@@ -63,6 +63,7 @@ public class LoginActivity extends Activity {
     }
 
     private boolean valid(String user, String pass) {
+        Log.d("TAG", "USER: " + user + " PASS: " + pass);
         if(user.equals("Vikingprime") && pass.equals("CompSci")){
             return true;
         }

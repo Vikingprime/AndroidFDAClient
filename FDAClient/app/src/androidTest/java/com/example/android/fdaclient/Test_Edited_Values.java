@@ -12,6 +12,7 @@ import junit.framework.Assert;
 public class Test_Edited_Values extends Login_Test {
     public void testRun() {
         solo.clickOnView(solo.getView(R.id.loginButton));
+        solo.sleep(mediumDelay);
         TextView textView = (TextView) solo.getView(R.id.wrongLogin);
         Assert.assertTrue("Test failed, message did not print",
                 textView.getText().toString().equals("Incorrect Login"));
