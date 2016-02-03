@@ -35,17 +35,18 @@
         android:id="@+id/createUser"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textSize="2dp"
-        android:layout_marginLeft="100dp"
+        android:textSize="8dp"
+        android:layout_marginLeft="140dp"
         android:text="@string/noAccount"
         android:clickable="true"/>
     <TextView
         android:id="@+id/wrongLogin"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textSize="30dp"
+        android:textSize="10dp"
+        android:textColor="@color/red"
         android:layout_marginTop="50dp"
-        android:layout_marginLeft="100dp"/>
+        android:layout_marginLeft="120dp"/>
 
     <FrameLayout
         android:layout_width="match_parent"
