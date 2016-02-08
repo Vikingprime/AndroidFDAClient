@@ -1,29 +1,209 @@
 package com.example.android.fdaclient;
 
+import android.content.Context;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.BaseAdapter;
+import android.widget.LinearLayout;
+import android.widget.ListView;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
+import android.widget.TextView;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
 
 public class StudyActivity extends AppCompatActivity {
+    private JSONObject json = new JSONObject();
+    ListView mListView;
+    SurveyAdapter mSurveyAdapter;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_study);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+        hardCodeJSON();
+        ArrayList<String> questions = new ArrayList<String>();
+        ArrayList<ArrayList<String>> answers = new ArrayList<ArrayList<String>>();
+        try {
+            JSONArray SAArray = json.getJSONArray("SAQuestions");
+            JSONArray MCArray = json.getJSONArray("MCQuestions");
+            JSONArray Answers = json.getJSONArray("MCAnswers");
+            int NumberSA = json.getInt("NumberSA");
+            int NumberMC = json.getInt("NumberMC");
+            int NumberCh = json.getInt("NumberCh");
+            for(int i = 0;i<SAArray.length();i++){
+                questions.add((String) SAArray.get(i));
             }
-        });
+            for(int i = 0;i<MCArray.length();i++){
+                questions.add((String) MCArray.get(i));
+            }
+            for(int i =0;i<Answers.length();i++){
+                answers.add(new ArrayList<String>());
+                for(int z =0;z<((JSONArray)(Answers.get(i))).length();z++){
+                    answers.get(i).add((String) ((JSONArray)(Answers.get(i))).get(z));
+                }
+            }
+
+            initializeViewFields(questions,answers,NumberSA,NumberMC,NumberCh);
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void initializeViewFields(ArrayList<String> questions, ArrayList<ArrayList<String>> answers, int
+            numberSA, int numberMC, int numberCh) {
+        mListView = (ListView) findViewById(R.id.survey_list);
+        mSurveyAdapter = new SurveyAdapter(numberSA,numberMC,numberCh);
+        mSurveyAdapter.setQuestions(questions,answers);
+        mListView.setAdapter(mSurveyAdapter);
+    }
+
+
+    private void hardCodeJSON(){
+        try {
+            json.put("NumberSA", 2);
+            json.put("NumberMC", 2);
+            json.put("NumberCh", 0);
+            json.accumulate("SAQuestions","What's your favorite color?");
+            json.accumulate("SAQuestions","What city were you born in?");
+            json.accumulate("MCQuestions", "How many hours do you sleep?");
+            json.accumulate("MCQuestions", "How many meals do you have per day?");
+            JSONArray AnswerArray= new JSONArray();
+            AnswerArray.put(new JSONArray());
+            AnswerArray.put(new JSONArray());
+            ((JSONArray) AnswerArray.get(0)).put("<1");
+            ((JSONArray) AnswerArray.get(0)).put("2-4");
+            ((JSONArray) AnswerArray.get(0)).put("2-4");
+            ((JSONArray) AnswerArray.get(0)).put("4-6");
+            ((JSONArray) AnswerArray.get(0)).put(">6");
+            ((JSONArray) AnswerArray.get(1)).put("1");
+            ((JSONArray) AnswerArray.get(1)).put("2");
+            ((JSONArray) AnswerArray.get(1)).put("3");
+            ((JSONArray) AnswerArray.get(1)).put(">3");
+            json.accumulate("MCAnswers",AnswerArray);
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private class SurveyAdapter extends BaseAdapter {
+
+        private static final int TYPE_MAX_COUNT = 3;
+
+        private ArrayList<String> mQuestions;
+        private ArrayList<ArrayList<String>> MCAnswers;
+        private LayoutInflater mInflater;
+        private int SA;
+        private int MC;
+        private int check;
+        private final int short_Answer_Question = 0;
+        private final int multiple_Choice_Question = 1;
+        private final int check_box_Question = 2;
+
+
+        public SurveyAdapter(int shortAnswer, int multipleChoice, int checkbox) {
+            mInflater = (LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            SA = shortAnswer;
+            MC = multipleChoice;
+            check = checkbox;
+        }
+
+
+        public void setQuestions(ArrayList<String> questions,ArrayList<ArrayList<String>> mcAnswers){
+            mQuestions = questions;
+            MCAnswers = mcAnswers;
+            notifyDataSetChanged();
+        }
+
+        @Override
+        public int getItemViewType(int position) {
+            int offset = ++position;
+          if(offset<=SA){
+                return short_Answer_Question;
+            }
+            else if(offset<=SA+MC){
+              return multiple_Choice_Question;
+          }
+            else {
+              return check_box_Question;
+          }
+        }
+
+        @Override
+        public int getViewTypeCount() {
+            return TYPE_MAX_COUNT;
+        }
+
+        @Override
+        public int getCount() {
+            return mQuestions.size();
+        }
+
+        @Override
+        public String getItem(int position) {
+            return mQuestions.get(position);
+        }
+
+        @Override
+        public long getItemId(int position) {
+            return position;
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            ViewHolder holder = null;
+            int type = getItemViewType(position);
+            System.out.println("getView " + position + " " + convertView + " type = " + type);
+            if (convertView == null) {
+                holder = new ViewHolder();
+                switch (type) {
+                    case short_Answer_Question:
+                        convertView = mInflater.inflate(R.layout.short_answer_listview, null);
+                        holder.textView = (TextView)convertView.findViewById(R.id.question);
+                        holder.rGroup = null;
+                        break;
+                    case multiple_Choice_Question:
+                        convertView = mInflater.inflate(R.layout.multiple_choice_listview, null);
+                        holder.rGroup = (RadioGroup)convertView.findViewById(R.id.radiogroup);
+                        break;
+                }
+                convertView.setTag(holder);
+            } else {
+                holder = (ViewHolder)convertView.getTag();
+            }
+            holder.textView.setText(mQuestions.get(position));
+            if(holder.rGroup!=null){
+                LinearLayout linlayout = new LinearLayout(StudyActivity.this);
+                linlayout.setOrientation(linlayout.HORIZONTAL);
+               int index =  MCAnswers.get(position-SA).size();
+                for (int i = 1; i <= index; i++) {
+                    RadioButton rdbtn = new RadioButton(StudyActivity.this);
+               //     rdbtn.setId(View.generateViewId());
+                    rdbtn.setText(MCAnswers.get(position-SA).get(i-1));
+                    linlayout.addView(rdbtn);
+                }
+                ((ViewGroup) findViewById(R.id.radiogroup)).addView(linlayout);
+
+
+            }
+            return convertView;
+        }
+
+    }
+
+    public static class ViewHolder {
+        public TextView textView;
+        public RadioGroup rGroup;
     }
 
 }
