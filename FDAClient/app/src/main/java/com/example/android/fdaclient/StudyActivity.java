@@ -3,6 +3,7 @@ package com.example.android.fdaclient;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,12 +18,19 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 
 public class StudyActivity extends AppCompatActivity {
     private JSONObject json = new JSONObject();
     ListView mListView;
     SurveyAdapter mSurveyAdapter;
+    String url = "ec2-52-207-254-157.compute-1.amazonaws.com:3000";
+    String email = "janeDoe@gmail.com";
 
 
     @Override
@@ -30,6 +38,7 @@ public class StudyActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_study);
         hardCodeJSON();
+        makeRequest();
         ArrayList<String> questions = new ArrayList<String>();
         ArrayList<ArrayList<String>> answers = new ArrayList<ArrayList<String>>();
         try {
@@ -82,7 +91,6 @@ public class StudyActivity extends AppCompatActivity {
             AnswerArray.put(new JSONArray());
             ((JSONArray) AnswerArray.get(0)).put("<1");
             ((JSONArray) AnswerArray.get(0)).put("2-4");
-            ((JSONArray) AnswerArray.get(0)).put("2-4");
             ((JSONArray) AnswerArray.get(0)).put("4-6");
             ((JSONArray) AnswerArray.get(0)).put(">6");
             ((JSONArray) AnswerArray.get(1)).put("1");
@@ -94,6 +102,41 @@ public class StudyActivity extends AppCompatActivity {
         } catch (JSONException e) {
             e.printStackTrace();
         }
+    }
+    private void makeRequest(){
+        Log.d("TAG", "ENTERED MAKE REQUEST");
+        String wholeUrl = url+"/api/getSurvey";
+        try {
+            URL url = new URL(wholeUrl);
+            HttpURLConnection con = (HttpURLConnection) url.openConnection();
+            // optional default is GET
+            con.setRequestMethod("GET");
+
+            //add request header
+            con.setRequestProperty("Email", email);
+
+
+            Log.d("TAG", "ABOUT TO SEND");
+            int responseCode = con.getResponseCode();
+
+            BufferedReader in = new BufferedReader(
+                    new InputStreamReader(con.getInputStream()));
+            String inputLine;
+            StringBuffer response = new StringBuffer();
+
+            while ((inputLine = in.readLine()) != null) {
+                response.append(inputLine);
+            }
+            in.close();
+
+            //print result
+           Log.d("TAG", response.toString());
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+
     }
 
     private class SurveyAdapter extends BaseAdapter {
