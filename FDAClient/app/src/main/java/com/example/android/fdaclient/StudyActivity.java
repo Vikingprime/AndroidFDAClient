@@ -41,30 +41,48 @@ public class StudyActivity extends AppCompatActivity {
         makeRequest();
         ArrayList<String> questions = new ArrayList<String>();
         ArrayList<ArrayList<String>> answers = new ArrayList<ArrayList<String>>();
+        Log.d("TAG", "ONCREATE AFTER HARDCODE");
         try {
-            JSONArray SAArray = json.getJSONArray("SAQuestions");
-            JSONArray MCArray = json.getJSONArray("MCQuestions");
-            JSONArray Answers = json.getJSONArray("MCAnswers");
+
             int NumberSA = json.getInt("NumberSA");
             int NumberMC = json.getInt("NumberMC");
             int NumberCh = json.getInt("NumberCh");
-            for(int i = 0;i<SAArray.length();i++){
+            JSONArray SAArray = null;
+            JSONArray MCArray = null;
+            JSONArray Answers = null;
+            if(NumberSA!=0) SAArray = json.getJSONArray("SAQuestions");
+            if(NumberMC!=0) {
+                MCArray = json.getJSONArray("MCQuestions");
+                Answers = json.getJSONArray("MCAnswers");
+            }
+
+
+            Log.d("TAG", "ONCREATE AFTER JSON RETRIEVAL");
+            for(int i = 0;i<NumberSA;i++){
                 questions.add((String) SAArray.get(i));
             }
-            for(int i = 0;i<MCArray.length();i++){
+            for(int i = 0;i<NumberMC;i++){
                 questions.add((String) MCArray.get(i));
+                Log.d("TAG","Added a Question: "+(String) MCArray.get(i));
             }
-            for(int i =0;i<Answers.length();i++){
+            for(int i =0;i<NumberMC;i++){
                 answers.add(new ArrayList<String>());
                 for(int z =0;z<((JSONArray)(Answers.get(i))).length();z++){
                     answers.get(i).add((String) ((JSONArray)(Answers.get(i))).get(z));
+                    Log.d("TAG","Added "+(String) ((JSONArray)(Answers.get(i))).get(z));
                 }
             }
 
-            initializeViewFields(questions,answers,NumberSA,NumberMC,NumberCh);
+
+            Log.d("TAG", "ONCREATE AFTER for loops");
+            initializeViewFields(questions, answers, NumberSA, NumberMC, NumberCh);
+
+
+            Log.d("TAG", "ONCREATE AFTER INIT VIEW");
 
         } catch (JSONException e) {
             e.printStackTrace();
+            Log.d("TAG", "JSON EXCEPTION "+e.toString());
         }
     }
 
@@ -82,10 +100,10 @@ public class StudyActivity extends AppCompatActivity {
             json.put("NumberSA", 2);
             json.put("NumberMC", 2);
             json.put("NumberCh", 0);
-            json.accumulate("SAQuestions","What's your favorite color?");
-            json.accumulate("SAQuestions","What city were you born in?");
-            json.accumulate("MCQuestions", "How many hours do you sleep?");
-            json.accumulate("MCQuestions", "How many meals do you have per day?");
+              json.accumulate("SAQuestions","What's your favorite color?");
+           json.accumulate("SAQuestions","What city were you born in?");
+              json.accumulate("MCQuestions", "How many hours do you sleep?");
+                json.accumulate("MCQuestions", "How many meals do you have per day?");
             JSONArray AnswerArray= new JSONArray();
             AnswerArray.put(new JSONArray());
             AnswerArray.put(new JSONArray());
@@ -209,6 +227,7 @@ public class StudyActivity extends AppCompatActivity {
             System.out.println("getView " + position + " " + convertView + " type = " + type);
             if (convertView == null) {
                 holder = new ViewHolder();
+                holder.buttonCreated = false;
                 switch (type) {
                     case short_Answer_Question:
                         convertView = mInflater.inflate(R.layout.short_answer_listview, null);
@@ -217,6 +236,7 @@ public class StudyActivity extends AppCompatActivity {
                         break;
                     case multiple_Choice_Question:
                         convertView = mInflater.inflate(R.layout.multiple_choice_listview, null);
+                        holder.textView = (TextView) convertView.findViewById(R.id.MCquestion);
                         holder.rGroup = (RadioGroup)convertView.findViewById(R.id.radiogroup);
                         break;
                 }
@@ -225,18 +245,19 @@ public class StudyActivity extends AppCompatActivity {
                 holder = (ViewHolder)convertView.getTag();
             }
             holder.textView.setText(mQuestions.get(position));
-            if(holder.rGroup!=null){
+            if(holder.rGroup!=null && holder.buttonCreated==false){
                 LinearLayout linlayout = new LinearLayout(StudyActivity.this);
-                linlayout.setOrientation(linlayout.HORIZONTAL);
+                linlayout.setOrientation(linlayout.VERTICAL);
                int index =  MCAnswers.get(position-SA).size();
                 for (int i = 1; i <= index; i++) {
                     RadioButton rdbtn = new RadioButton(StudyActivity.this);
                //     rdbtn.setId(View.generateViewId());
                     rdbtn.setText(MCAnswers.get(position-SA).get(i-1));
+                    Log.d("TAG", "Setting Text "+MCAnswers.get(position-SA).get(i-1));
                     linlayout.addView(rdbtn);
                 }
-                ((ViewGroup) findViewById(R.id.radiogroup)).addView(linlayout);
-
+                holder.rGroup.addView(linlayout);
+                holder.buttonCreated=true;
 
             }
             return convertView;
@@ -247,6 +268,7 @@ public class StudyActivity extends AppCompatActivity {
     public static class ViewHolder {
         public TextView textView;
         public RadioGroup rGroup;
+        public boolean buttonCreated;
     }
 
 }
