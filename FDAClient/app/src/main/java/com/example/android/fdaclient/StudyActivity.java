@@ -29,7 +29,7 @@ public class StudyActivity extends AppCompatActivity {
     private JSONObject json = new JSONObject();
     ListView mListView;
     SurveyAdapter mSurveyAdapter;
-    String url = "ec2-52-207-254-157.compute-1.amazonaws.com:3000";
+    String url = "http://ec2-52-207-254-157.compute-1.amazonaws.com:3000";
     String email = "janeDoe@gmail.com";
 
 
@@ -122,38 +122,46 @@ public class StudyActivity extends AppCompatActivity {
         }
     }
     private void makeRequest(){
-        Log.d("TAG", "ENTERED MAKE REQUEST");
-        String wholeUrl = url+"/api/getSurvey";
-        try {
-            URL url = new URL(wholeUrl);
-            HttpURLConnection con = (HttpURLConnection) url.openConnection();
-            // optional default is GET
-            con.setRequestMethod("GET");
+        Runnable runnable = new Runnable() {
 
-            //add request header
-            con.setRequestProperty("Email", email);
+            @Override
+            public void run() {
+                Log.d("TAG", "ENTERED MAKE REQUEST");
+                String wholeUrl = url+"/api/getSurvey";
+                try {
+                    URL url = new URL(wholeUrl);
+                    HttpURLConnection con = (HttpURLConnection) url.openConnection();
+                    // optional default is GET
+                    con.setRequestMethod("GET");
+
+                    //add request header
+                    con.setRequestProperty("Email", email);
 
 
-            Log.d("TAG", "ABOUT TO SEND");
-            int responseCode = con.getResponseCode();
+                    Log.d("TAG", "ABOUT TO SEND");
+                    int responseCode = con.getResponseCode();
 
-            BufferedReader in = new BufferedReader(
-                    new InputStreamReader(con.getInputStream()));
-            String inputLine;
-            StringBuffer response = new StringBuffer();
+                    BufferedReader in = new BufferedReader(
+                            new InputStreamReader(con.getInputStream()));
+                    String inputLine;
+                    StringBuffer response = new StringBuffer();
 
-            while ((inputLine = in.readLine()) != null) {
-                response.append(inputLine);
+                    while ((inputLine = in.readLine()) != null) {
+                        response.append(inputLine);
+                    }
+                    in.close();
+
+                    //print result
+                    Log.d("TAG", response.toString());
+
+                } catch (Exception e) {
+                    Log.d("TAG",e.toString());
+                }
+
             }
-            in.close();
-
-            //print result
-           Log.d("TAG", response.toString());
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
+        };
+        Thread thread = new Thread(runnable);
+        thread.start();
 
     }
 
