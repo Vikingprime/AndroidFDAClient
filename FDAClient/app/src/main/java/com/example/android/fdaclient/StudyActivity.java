@@ -25,7 +25,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 
-public class StudyActivity extends AppCompatActivity {
+public class StudyActivity extends AppCompatActivity implements JSONParser{
     private JSONObject json = new JSONObject();
     ListView mListView;
     SurveyAdapter mSurveyAdapter;
@@ -39,58 +39,13 @@ public class StudyActivity extends AppCompatActivity {
         setContentView(R.layout.activity_study);
         hardCodeJSON();
         makeRequest();
-        ArrayList<String> questions = new ArrayList<String>();
-        ArrayList<ArrayList<String>> answers = new ArrayList<ArrayList<String>>();
-        Log.d("TAG", "ONCREATE AFTER HARDCODE");
-        try {
 
-            int NumberSA = json.getInt("NumberSA");
-            int NumberMC = json.getInt("NumberMC");
-            int NumberCh = json.getInt("NumberCh");
-            JSONArray SAArray = null;
-            JSONArray MCArray = null;
-            JSONArray Answers = null;
-            if(NumberSA!=0) SAArray = json.getJSONArray("SAQuestions");
-            if(NumberMC!=0) {
-                MCArray = json.getJSONArray("MCQuestions");
-                Answers = json.getJSONArray("MCAnswers");
-            }
-
-
-            Log.d("TAG", "ONCREATE AFTER JSON RETRIEVAL");
-            for(int i = 0;i<NumberSA;i++){
-                questions.add((String) SAArray.get(i));
-            }
-            for(int i = 0;i<NumberMC;i++){
-                questions.add((String) MCArray.get(i));
-                Log.d("TAG","Added a Question: "+(String) MCArray.get(i));
-            }
-            for(int i =0;i<NumberMC;i++){
-                answers.add(new ArrayList<String>());
-                for(int z =0;z<((JSONArray)(Answers.get(i))).length();z++){
-                    answers.get(i).add((String) ((JSONArray)(Answers.get(i))).get(z));
-                    Log.d("TAG","Added "+(String) ((JSONArray)(Answers.get(i))).get(z));
-                }
-            }
-
-
-            Log.d("TAG", "ONCREATE AFTER for loops");
-            initializeViewFields(questions, answers, NumberSA, NumberMC, NumberCh);
-
-
-            Log.d("TAG", "ONCREATE AFTER INIT VIEW");
-
-        } catch (JSONException e) {
-            e.printStackTrace();
-            Log.d("TAG", "JSON EXCEPTION "+e.toString());
         }
-    }
 
-    private void initializeViewFields(ArrayList<String> questions, ArrayList<ArrayList<String>> answers, int
-            numberSA, int numberMC, int numberCh) {
+    private void initializeViewFields(ArrayList<Question> questions) {
         mListView = (ListView) findViewById(R.id.survey_list);
-        mSurveyAdapter = new SurveyAdapter(numberSA,numberMC,numberCh);
-        mSurveyAdapter.setQuestions(questions,answers);
+        mSurveyAdapter = new SurveyAdapter();
+        mSurveyAdapter.setQuestions(questions);
         mListView.setAdapter(mSurveyAdapter);
     }
 
@@ -122,46 +77,28 @@ public class StudyActivity extends AppCompatActivity {
         }
     }
     private void makeRequest(){
-        Runnable runnable = new Runnable() {
+        new GetJSONAsyncTask(url,email,this).execute();
 
-            @Override
-            public void run() {
-                Log.d("TAG", "ENTERED MAKE REQUEST");
-                String wholeUrl = url+"/api/getSurvey";
-                try {
-                    URL url = new URL(wholeUrl);
-                    HttpURLConnection con = (HttpURLConnection) url.openConnection();
-                    // optional default is GET
-                    con.setRequestMethod("GET");
+    }
 
-                    //add request header
-                    con.setRequestProperty("Email", email);
+    @Override
+    public void parse(JSONObject object) {
+        ArrayList<Question> questionList = new ArrayList<Question>();
+        Log.d("TAG", "ONCREATE AFTER HARDCODE");
+        try {
+            JSONArray Questions = object.getJSONArray("questions");
 
-
-                    Log.d("TAG", "ABOUT TO SEND");
-                    int responseCode = con.getResponseCode();
-
-                    BufferedReader in = new BufferedReader(
-                            new InputStreamReader(con.getInputStream()));
-                    String inputLine;
-                    StringBuffer response = new StringBuffer();
-
-                    while ((inputLine = in.readLine()) != null) {
-                        response.append(inputLine);
-                    }
-                    in.close();
-
-                    //print result
-                    Log.d("TAG", response.toString());
-
-                } catch (Exception e) {
-                    Log.d("TAG",e.toString());
-                }
-
+            for (int i = 0; i < Questions.length(); i++) {
+                String prompt = ((JSONObject) Questions.get(i)).getString("prompt");
+                String type = ((JSONObject) Questions.get(i)).getString("type");
+                JSONArray answers = ((JSONObject) Questions.get(i)).getJSONArray("option");
+                Question question = new Question(type, prompt, answers);
+                questionList.add(question);
             }
-        };
-        Thread thread = new Thread(runnable);
-        thread.start();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        initializeViewFields(questionList);
 
     }
 
@@ -169,38 +106,30 @@ public class StudyActivity extends AppCompatActivity {
 
         private static final int TYPE_MAX_COUNT = 3;
 
-        private ArrayList<String> mQuestions;
-        private ArrayList<ArrayList<String>> MCAnswers;
+        private ArrayList<Question> mQuestions;
         private LayoutInflater mInflater;
-        private int SA;
-        private int MC;
-        private int check;
         private final int short_Answer_Question = 0;
         private final int multiple_Choice_Question = 1;
         private final int check_box_Question = 2;
 
 
-        public SurveyAdapter(int shortAnswer, int multipleChoice, int checkbox) {
+        public SurveyAdapter() {
             mInflater = (LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            SA = shortAnswer;
-            MC = multipleChoice;
-            check = checkbox;
         }
 
 
-        public void setQuestions(ArrayList<String> questions,ArrayList<ArrayList<String>> mcAnswers){
+        public void setQuestions(ArrayList<Question> questions){
             mQuestions = questions;
-            MCAnswers = mcAnswers;
             notifyDataSetChanged();
         }
 
         @Override
         public int getItemViewType(int position) {
-            int offset = ++position;
-          if(offset<=SA){
+            String type = getItem(position).getType();
+          if(type.equals("txt")){
                 return short_Answer_Question;
             }
-            else if(offset<=SA+MC){
+            else if(type.equals("MC")){
               return multiple_Choice_Question;
           }
             else {
@@ -219,7 +148,7 @@ public class StudyActivity extends AppCompatActivity {
         }
 
         @Override
-        public String getItem(int position) {
+        public Question getItem(int position) {
             return mQuestions.get(position);
         }
 
@@ -252,16 +181,19 @@ public class StudyActivity extends AppCompatActivity {
             } else {
                 holder = (ViewHolder)convertView.getTag();
             }
-            holder.textView.setText(mQuestions.get(position));
+            holder.textView.setText(mQuestions.get(position).getPrompt());
             if(holder.rGroup!=null && holder.buttonCreated==false){
                 LinearLayout linlayout = new LinearLayout(StudyActivity.this);
                 linlayout.setOrientation(linlayout.VERTICAL);
-               int index =  MCAnswers.get(position-SA).size();
-                for (int i = 1; i <= index; i++) {
+               int index =  mQuestions.get(position).getAnswers().length();
+                for (int i = 0; i < index; i++) {
                     RadioButton rdbtn = new RadioButton(StudyActivity.this);
                //     rdbtn.setId(View.generateViewId());
-                    rdbtn.setText(MCAnswers.get(position-SA).get(i-1));
-                    Log.d("TAG", "Setting Text "+MCAnswers.get(position-SA).get(i-1));
+                    try {
+                        rdbtn.setText(mQuestions.get(position).getAnswers().getString(i));
+                    }catch(Exception e){
+                        rdbtn.setText("Null question");
+                    }
                     linlayout.addView(rdbtn);
                 }
                 holder.rGroup.addView(linlayout);

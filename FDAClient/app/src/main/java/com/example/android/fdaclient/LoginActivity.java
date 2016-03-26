@@ -71,6 +71,7 @@ public class LoginActivity extends Activity {
             return false;
         }
     }
+
     private void noPassword(){
         error.setText(R.string.login_error);
     }
