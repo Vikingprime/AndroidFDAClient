@@ -27,6 +27,7 @@ import java.util.ArrayList;
 
 public class StudyActivity extends AppCompatActivity implements JSONParser{
     private JSONObject json = new JSONObject();
+
     ListView mListView;
     SurveyAdapter mSurveyAdapter;
     String url = "http://ec2-54-165-195-77.compute-1.amazonaws.com:3000";
