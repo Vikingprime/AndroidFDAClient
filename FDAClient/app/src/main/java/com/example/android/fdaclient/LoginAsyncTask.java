@@ -1,6 +1,7 @@
 package com.example.android.fdaclient;
 
 import android.os.AsyncTask;
+import android.util.Log;
 
 import org.json.JSONObject;
 
@@ -51,6 +52,7 @@ public class LoginAsyncTask extends AsyncTask<Void,Void,String>{
             }
             in.close();
 
+            Log.d("HERE", "GOT HERE");
             //print result
 
             return response.toString();
@@ -62,6 +64,7 @@ public class LoginAsyncTask extends AsyncTask<Void,Void,String>{
 
     @Override
     protected void onPostExecute(String result) {
+        Log.d("LOGIN", result);
         mValid.isValid(Boolean.parseBoolean(result));
     }
 

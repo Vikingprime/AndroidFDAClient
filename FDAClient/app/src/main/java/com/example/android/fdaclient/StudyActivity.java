@@ -30,7 +30,7 @@ public class StudyActivity extends AppCompatActivity implements JSONParser{
 
     ListView mListView;
     SurveyAdapter mSurveyAdapter;
-    String url = "http://ec2-54-165-195-77.compute-1.amazonaws.com:3000";
+    public static String url = "http://ec2-54-165-195-77.compute-1.amazonaws.com:3000";
     String email = "janeDoe@gmail.com";
 
 
