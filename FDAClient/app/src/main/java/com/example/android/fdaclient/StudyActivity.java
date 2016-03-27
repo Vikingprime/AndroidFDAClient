@@ -27,10 +27,12 @@ import java.util.ArrayList;
 
 public class StudyActivity extends AppCompatActivity implements JSONParser{
     private JSONObject json = new JSONObject();
-    ListView mListView;
-    SurveyAdapter mSurveyAdapter;
-    String url = "http://ec2-52-207-254-157.compute-1.amazonaws.com:3000";
-    String email = "janeDoe@gmail.com";
+    private ListView mListView;
+    private SurveyAdapter mSurveyAdapter;
+    public static String url = "http://ec2-52-207-254-157.compute-1.amazonaws.com:3000";
+
+    //Get rid of this next line
+    private String email = "janeDoe@gmail.com";
 
 
     @Override

@@ -16,7 +16,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
-public class LoginActivity extends Activity {
+public class LoginActivity extends Activity implements ValidityCheck{
     Button Login;
     TextView newUser;
     EditText e1;
@@ -41,7 +41,7 @@ public class LoginActivity extends Activity {
         return new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent (context, NewUserActivity.class));
+                startActivity(new Intent(context, NewUserActivity.class));
             }
         };
     }
@@ -50,25 +50,20 @@ public class LoginActivity extends Activity {
         return new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String user = e1.getText().toString();
+                String email = e1.getText().toString();
                 String pass = e2.getText().toString();
-                if(valid(user,pass))
-                startActivity(new Intent (context, StudyActivity.class));
 
-                else {
-                    noPassword();
-                }
+                new LoginAsyncTask(StudyActivity.url,email,pass,(ValidityCheck)context).execute();
             }
         };
     }
 
-    private boolean valid(String user, String pass) {
-        Log.d("TAG", "USER: " + user + " PASS: " + pass);
-        if(user.equals("Vikingprime") && pass.equals("CompSci")){
-            return true;
-        }
+    public void isValid(Boolean valid) {
+        if(valid)
+            startActivity(new Intent (this, StudyActivity.class));
+
         else {
-            return false;
+            noPassword();
         }
     }
 

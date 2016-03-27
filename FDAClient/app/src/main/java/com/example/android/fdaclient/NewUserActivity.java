@@ -9,6 +9,10 @@ import android.view.View;
 
 public class NewUserActivity extends AppCompatActivity {
 
+    String urlextension = "/api/login";
+    //post request
+    //email as email
+    //password as password
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
