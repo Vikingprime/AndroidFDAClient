@@ -29,15 +29,15 @@ public class StudyActivity extends AppCompatActivity implements JSONParser{
     private JSONObject json = new JSONObject();
     ListView mListView;
     SurveyAdapter mSurveyAdapter;
-    String url = "http://ec2-52-207-254-157.compute-1.amazonaws.com:3000";
+    String url = "http://ec2-54-165-195-77.compute-1.amazonaws.com:3000";
     String email = "janeDoe@gmail.com";
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.d("TAG", "ONCREATE AFTER HARDCODE");
         setContentView(R.layout.activity_study);
-        hardCodeJSON();
         makeRequest();
 
         }
@@ -84,14 +84,14 @@ public class StudyActivity extends AppCompatActivity implements JSONParser{
     @Override
     public void parse(JSONObject object) {
         ArrayList<Question> questionList = new ArrayList<Question>();
-        Log.d("TAG", "ONCREATE AFTER HARDCODE");
         try {
             JSONArray Questions = object.getJSONArray("questions");
+            Log.d("ARRAY",Questions.toString());
 
             for (int i = 0; i < Questions.length(); i++) {
                 String prompt = ((JSONObject) Questions.get(i)).getString("prompt");
                 String type = ((JSONObject) Questions.get(i)).getString("type");
-                JSONArray answers = ((JSONObject) Questions.get(i)).getJSONArray("option");
+                JSONArray answers = ((JSONObject) Questions.get(i)).getJSONArray("options");
                 Question question = new Question(type, prompt, answers);
                 questionList.add(question);
             }
@@ -126,10 +126,10 @@ public class StudyActivity extends AppCompatActivity implements JSONParser{
         @Override
         public int getItemViewType(int position) {
             String type = getItem(position).getType();
-          if(type.equals("txt")){
+          if(type.equals("Txt")){
                 return short_Answer_Question;
             }
-            else if(type.equals("MC")){
+            else if(type.equals("Mc")){
               return multiple_Choice_Question;
           }
             else {

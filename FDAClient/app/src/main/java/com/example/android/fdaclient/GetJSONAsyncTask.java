@@ -27,7 +27,9 @@ public class GetJSONAsyncTask extends AsyncTask<Void, Void, String> {
     @Override
     protected String doInBackground(Void... params) {
         String wholeUrl = mUrl+"/api/getSurvey";
+        Log.d("WHOLE URL",wholeUrl);
         try {
+            Log.d("TAG","ABOUT TO REQUEST");
             URL url = new URL(wholeUrl);
             HttpURLConnection con = (HttpURLConnection) url.openConnection();
             // optional default is GET
@@ -48,16 +50,19 @@ public class GetJSONAsyncTask extends AsyncTask<Void, Void, String> {
             }
             in.close();
 
-            //print result
+
+            Log.d("TAG", "Checking Response " + response.toString());
 
             return response.toString();
 
         } catch (Exception e) {
+            Log.d("EXCEPTION",e.toString());
             return null;
         }
     }
     @Override
     protected void onPostExecute(String result) {
+        Log.d("TAG","ABOUT TO REQUEST ACTIVITY"+result);
         JSONObject jsonObj=null;
         try {
             jsonObj = new JSONObject(result);
