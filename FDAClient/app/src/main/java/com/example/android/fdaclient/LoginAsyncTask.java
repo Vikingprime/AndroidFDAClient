@@ -19,13 +19,13 @@ public class LoginAsyncTask extends AsyncTask<Void,Void,String>{
     private String mUrl;
     private String mEmail;
     private String mPassword;
-    private ValidityCheck mValid;
+    private JSONParser mParser;
 
-    public LoginAsyncTask(String url, String email,String password, ValidityCheck valid){
+    public LoginAsyncTask(String url, String email,String password, JSONParser surveyParser){
         mUrl = url;
         mEmail = email;
         mPassword = password;
-        mValid = valid;
+        mParser= surveyParser;
     }
     @Override
     protected String doInBackground(Void... params) {
@@ -65,7 +65,14 @@ public class LoginAsyncTask extends AsyncTask<Void,Void,String>{
     @Override
     protected void onPostExecute(String result) {
         Log.d("LOGIN", result);
-        mValid.isValid(Boolean.parseBoolean(result));
+        Log.d("TAG","ABOUT TO REQUEST ACTIVITY"+result);
+        JSONObject jsonObj=null;
+        try {
+            jsonObj = new JSONObject(result);
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+        mParser.parse(jsonObj);
     }
 
 }

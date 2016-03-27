@@ -16,7 +16,13 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
-public class LoginActivity extends Activity implements ValidityCheck{
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
+
+public class LoginActivity extends Activity implements JSONParser{
     Button Login;
     TextView newUser;
     EditText e1;
@@ -53,7 +59,7 @@ public class LoginActivity extends Activity implements ValidityCheck{
                 String email = e1.getText().toString();
                 String pass = e2.getText().toString();
 
-                new LoginAsyncTask(StudyActivity.url,email,pass,(ValidityCheck)context).execute();
+                new LoginAsyncTask(StudyActivity.url,email,pass,(JSONParser)context).execute();
             }
         };
     }
@@ -91,5 +97,22 @@ public class LoginActivity extends Activity implements ValidityCheck{
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void parse(JSONObject object) {
+        ArrayList<Question> surveyList = new ArrayList<Question>();
+        try {
+            JSONArray Surveys = object.getJSONArray("survey");
+            if(Surveys.length()==0){
+                Log.d("SURVEYS",Surveys.toString());
+                isValid(false);
+            }
+            else {
+                isValid(true);
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 }
