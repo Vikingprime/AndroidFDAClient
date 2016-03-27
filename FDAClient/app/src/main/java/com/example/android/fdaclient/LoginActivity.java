@@ -63,11 +63,11 @@ public class LoginActivity extends Activity implements ValidityCheck{
             startActivity(new Intent (this, StudyActivity.class));
 
         else {
-            noPassword();
+            notValid();
         }
     }
 
-    private void noPassword(){
+    public void notValid(){
         error.setText(R.string.login_error);
     }
 

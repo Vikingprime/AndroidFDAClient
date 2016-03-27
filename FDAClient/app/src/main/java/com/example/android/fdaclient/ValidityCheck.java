@@ -5,4 +5,5 @@ package com.example.android.fdaclient;
  */
 public interface ValidityCheck {
     public void isValid(Boolean valid);
+    public void notValid();
 }

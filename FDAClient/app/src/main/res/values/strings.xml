@@ -10,4 +10,6 @@
     <string name="title_activity_study">StudyActivity</string>
     <string name="signup_button">Sign Up</string>
     <string name="login_error">Incorrect Login</string>
+    <string name="signup_error">Email is already connected to an Account</string>
+    <string name="name">Name</string>
 </resources>

@@ -5,6 +5,15 @@
     android:orientation="vertical" >
 
     <EditText
+        android:id="@+id/Name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:ems="10"
+        android:hint="@string/name"
+        android:inputType="text|textMultiLine|textUri" >
+    </EditText>
+    <EditText
         android:id="@+id/Email"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
