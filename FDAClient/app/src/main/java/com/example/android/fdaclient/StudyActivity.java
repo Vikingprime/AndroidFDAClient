@@ -18,17 +18,13 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 
 public class StudyActivity extends AppCompatActivity implements JSONParser{
     private JSONObject json = new JSONObject();
 
     ListView mListView;
+    QuestionAdapter mQuestionAdapter;
     SurveyAdapter mSurveyAdapter;
     public static String url = "http://ec2-54-165-195-77.compute-1.amazonaws.com:3000";
     String email = "janeDoe@gmail.com";
@@ -39,44 +35,46 @@ public class StudyActivity extends AppCompatActivity implements JSONParser{
         super.onCreate(savedInstanceState);
         Log.d("TAG", "ONCREATE AFTER HARDCODE");
         setContentView(R.layout.activity_study);
-        makeRequest();
-
-        }
-
-    private void initializeViewFields(ArrayList<Question> questions) {
-        mListView = (ListView) findViewById(R.id.survey_list);
-        mSurveyAdapter = new SurveyAdapter();
-        mSurveyAdapter.setQuestions(questions);
-        mListView.setAdapter(mSurveyAdapter);
-    }
-
-
-    private void hardCodeJSON(){
+     //   makeRequest();
+        JSONObject object=null;
         try {
-            json.put("NumberSA", 2);
-            json.put("NumberMC", 2);
-            json.put("NumberCh", 0);
-              json.accumulate("SAQuestions","What's your favorite color?");
-           json.accumulate("SAQuestions","What city were you born in?");
-              json.accumulate("MCQuestions", "How many hours do you sleep?");
-                json.accumulate("MCQuestions", "How many meals do you have per day?");
-            JSONArray AnswerArray= new JSONArray();
-            AnswerArray.put(new JSONArray());
-            AnswerArray.put(new JSONArray());
-            ((JSONArray) AnswerArray.get(0)).put("<1");
-            ((JSONArray) AnswerArray.get(0)).put("2-4");
-            ((JSONArray) AnswerArray.get(0)).put("4-6");
-            ((JSONArray) AnswerArray.get(0)).put(">6");
-            ((JSONArray) AnswerArray.get(1)).put("1");
-            ((JSONArray) AnswerArray.get(1)).put("2");
-            ((JSONArray) AnswerArray.get(1)).put("3");
-            ((JSONArray) AnswerArray.get(1)).put(">3");
-            json.accumulate("MCAnswers",AnswerArray);
-
+            object = new JSONObject(getIntent().getStringExtra("JSONString"));
         } catch (JSONException e) {
             e.printStackTrace();
         }
+        mListView = (ListView) findViewById(R.id.survey_list);
+        initializeSurveyFields(object);
+
     }
+
+    private void initializeQuestionFields(ArrayList<Question> questions) {
+        mQuestionAdapter = new QuestionAdapter();
+        mQuestionAdapter.setQuestions(questions);
+        mListView.setAdapter(mQuestionAdapter);
+    }
+
+    private void initializeSurveyFields(JSONObject json){
+        ArrayList<Survey> surveyList = new ArrayList<Survey>();
+        try {
+            JSONArray surveys = json.getJSONArray("survey");
+            Log.d("ARRAY",surveys.toString());
+
+            for (int i = 0; i < surveys.length(); i++) {
+                String name = ((JSONObject) surveys.get(i)).getString("name");
+                String id = ((JSONObject) surveys.get(i)).getString("id");
+                Survey survey = new Survey(name,id);
+                surveyList.add(survey);
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        mSurveyAdapter = new SurveyAdapter(surveyList,(LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE));
+        mListView.setAdapter(mSurveyAdapter);
+
+    }
+
+
+
     private void makeRequest(){
         new GetJSONAsyncTask(url,email,this).execute();
 
@@ -99,11 +97,11 @@ public class StudyActivity extends AppCompatActivity implements JSONParser{
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        initializeViewFields(questionList);
+        initializeQuestionFields(questionList);
 
     }
 
-    private class SurveyAdapter extends BaseAdapter {
+    private class QuestionAdapter extends BaseAdapter {
 
         private static final int TYPE_MAX_COUNT = 3;
 
@@ -114,7 +112,7 @@ public class StudyActivity extends AppCompatActivity implements JSONParser{
         private final int check_box_Question = 2;
 
 
-        public SurveyAdapter() {
+        public QuestionAdapter() {
             mInflater = (LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         }
 
@@ -162,9 +160,8 @@ public class StudyActivity extends AppCompatActivity implements JSONParser{
         public View getView(int position, View convertView, ViewGroup parent) {
             ViewHolder holder = null;
             int type = getItemViewType(position);
-            System.out.println("getView " + position + " " + convertView + " type = " + type);
-            if (convertView == null) {
-                holder = new ViewHolder();
+                if (convertView == null) {
+                    holder = new ViewHolder();
                 holder.buttonCreated = false;
                 switch (type) {
                     case short_Answer_Question:
@@ -193,7 +190,7 @@ public class StudyActivity extends AppCompatActivity implements JSONParser{
                     try {
                         rdbtn.setText(mQuestions.get(position).getAnswers().getString(i));
                     }catch(Exception e){
-                        rdbtn.setText("Null question");
+                        rdbtn.setText("Null Question");
                     }
                     linlayout.addView(rdbtn);
                 }

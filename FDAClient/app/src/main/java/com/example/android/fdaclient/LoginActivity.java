@@ -4,10 +4,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.view.Menu;
@@ -28,6 +24,8 @@ public class LoginActivity extends Activity implements JSONParser{
     EditText e1;
     EditText e2;
     TextView error;
+    private Intent intent;
+    SurveyAdapter surveyAdapter;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -66,7 +64,7 @@ public class LoginActivity extends Activity implements JSONParser{
 
     public void isValid(Boolean valid) {
         if(valid)
-            startActivity(new Intent (this, StudyActivity.class));
+            startActivity(intent);
 
         else {
             notValid();
@@ -101,18 +99,34 @@ public class LoginActivity extends Activity implements JSONParser{
 
     @Override
     public void parse(JSONObject object) {
-        ArrayList<Question> surveyList = new ArrayList<Question>();
+        JSONArray surveys=null;
+        intent = new Intent(this,StudyActivity.class);
         try {
-            JSONArray Surveys = object.getJSONArray("survey");
-            if(Surveys.length()==0){
-                Log.d("SURVEYS",Surveys.toString());
-                isValid(false);
-            }
-            else {
-                isValid(true);
-            }
+            surveys = object.getJSONArray("survey");
+            intent.putExtra("JSONString",object.toString());
         } catch (JSONException e) {
             e.printStackTrace();
         }
+
+       isValid(!(surveys==null || surveys.length()==0));
+
+//        ArrayList<Survey> surveyList = new ArrayList<>();
+//        try {
+//            JSONArray Surveys = object.getJSONArray("survey");
+//            for(int i = 0; i<surveyList.size();i++){
+//                String name = ((JSONObject) Surveys.get(i)).getString("name");
+//                String id = ((JSONObject) Surveys.get(i)).getString("id");
+//                surveyList.add(new Survey(name,id));
+//            }
+//            if(Surveys.length()==0){
+//                Log.d("SURVEYS",Surveys.toString());
+//                isValid(false);
+//            }
+//            else {
+//                isValid(true);
+//            }
+//        } catch (JSONException e) {
+//            e.printStackTrace();
+//        }
     }
 }
