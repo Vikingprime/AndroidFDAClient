@@ -10,6 +10,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RadioButton;
@@ -56,7 +57,37 @@ public class StudyActivity extends AppCompatActivity implements JSONParser{
     }
 
     private View.OnClickListener makeOnClickListener() {
-        return View.OnClickListener;
+        return new View.OnClickListener(){
+
+            @Override
+            public void onClick(View v) {
+                String json;
+                for(int i=0;i<mQuestionAdapter.getCount();i++) {
+                    String answer= ((EditText)
+                            (getViewByPosition(i,mListView).findViewById(R.id.answer))).getText().toString();
+
+                    if (((Question) mQuestionAdapter.getItem(i)).getType() == "Txt") {
+                        json = i + answer;
+                        sendResults(json);
+                    }
+                }
+            }
+        };
+    }
+    public void sendResults(String json){
+        new sendResult(url,json).execute();
+    }
+
+    public View getViewByPosition(int pos, ListView listView) {
+        final int firstListItemPosition = listView.getFirstVisiblePosition();
+        final int lastListItemPosition = firstListItemPosition + listView.getChildCount() - 1;
+
+        if (pos < firstListItemPosition || pos > lastListItemPosition ) {
+            return listView.getAdapter().getView(pos, null, listView);
+        } else {
+            final int childIndex = pos - firstListItemPosition;
+            return listView.getChildAt(childIndex);
+        }
     }
 
     private void initializeQuestionFields(ArrayList<Question> questions) {

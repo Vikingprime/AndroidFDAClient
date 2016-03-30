@@ -9,12 +9,13 @@
     <ListView
         android:id="@+id/survey_list"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" >
+        android:layout_height="445dp" >
     </ListView>
     <Button
         android:id="@+id/SubmitButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_weight="0.2"
         android:text="@string/submit_button" />
 
 </LinearLayout>
