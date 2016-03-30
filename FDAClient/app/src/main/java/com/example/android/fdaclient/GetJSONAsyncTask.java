@@ -18,11 +18,15 @@ public class GetJSONAsyncTask extends AsyncTask<Void, Void, String> {
     private String mUrl;
     private String mEmail;
     private JSONParser mParser;
+    private String surveyID;
+    private String mPassword;
 
-    public GetJSONAsyncTask(String url, String email, JSONParser parser){
+    public GetJSONAsyncTask(String url, String email,String id,String password, JSONParser parser){
         mUrl = url;
         mEmail = email;
         mParser = parser;
+        surveyID = id;
+        mPassword = password;
     }
     @Override
     protected String doInBackground(Void... params) {
@@ -33,10 +37,12 @@ public class GetJSONAsyncTask extends AsyncTask<Void, Void, String> {
             URL url = new URL(wholeUrl);
             HttpURLConnection con = (HttpURLConnection) url.openConnection();
             // optional default is GET
-            con.setRequestMethod("GET");
+            con.setRequestMethod("POST");
 
             //add request header
-            con.setRequestProperty("Email", mEmail);
+            con.setRequestProperty("email", mEmail);
+            con.setRequestProperty("id",surveyID);
+            con.setRequestProperty("password",mPassword);
 
             int responseCode = con.getResponseCode();
 

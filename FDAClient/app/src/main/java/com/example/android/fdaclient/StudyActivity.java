@@ -7,6 +7,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.LinearLayout;
@@ -27,9 +28,10 @@ public class StudyActivity extends AppCompatActivity implements JSONParser{
     ListView mListView;
     QuestionAdapter mQuestionAdapter;
     SurveyAdapter mSurveyAdapter;
+    private String email;
+    private String password;
     public static String url = "http://ec2-54-165-195-77.compute-1.amazonaws.com:3000";
     private Button submitButton;
-    String email = "janeDoe@gmail.com";
 
 
     @Override
@@ -37,7 +39,9 @@ public class StudyActivity extends AppCompatActivity implements JSONParser{
         super.onCreate(savedInstanceState);
         Log.d("TAG", "ONCREATE AFTER HARDCODE");
         setContentView(R.layout.activity_study);
-     //   makeRequest();
+
+        email = getIntent().getStringExtra("email");
+        password = getIntent().getStringExtra("password");
         JSONObject object=null;
         try {
             object = new JSONObject(getIntent().getStringExtra("JSONString"));
@@ -69,8 +73,8 @@ public class StudyActivity extends AppCompatActivity implements JSONParser{
 
             for (int i = 0; i < surveys.length(); i++) {
                 String name = ((JSONObject) surveys.get(i)).getString("name");
-                String id = ((JSONObject) surveys.get(i)).getString("id");
-                Survey survey = new Survey(name,id);
+                String id = ((JSONObject) surveys.get(i)).getString("_id");
+                Survey survey = new Survey(id,name);
                 surveyList.add(survey);
             }
         } catch (JSONException e) {
@@ -78,13 +82,21 @@ public class StudyActivity extends AppCompatActivity implements JSONParser{
         }
         mSurveyAdapter = new SurveyAdapter(surveyList,(LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE));
         mListView.setAdapter(mSurveyAdapter);
+        mListView.setOnItemClickListener(makeOnItemClickListener());
 
     }
 
+    private AdapterView.OnItemClickListener makeOnItemClickListener() {
+        return new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                makeRequest(((Survey)(mSurveyAdapter.getItem(position))).getSurveyID(),email,password);
+            }
+        };
+    }
 
-
-    private void makeRequest(){
-        new GetJSONAsyncTask(url,email,this).execute();
+    private void makeRequest(String surveyID,String email,String password){
+        new GetJSONAsyncTask(url,email,surveyID,password,this).execute();
 
     }
 
@@ -181,6 +193,10 @@ public class StudyActivity extends AppCompatActivity implements JSONParser{
                         convertView = mInflater.inflate(R.layout.multiple_choice_listview, null);
                         holder.textView = (TextView) convertView.findViewById(R.id.MCquestion);
                         holder.rGroup = (RadioGroup)convertView.findViewById(R.id.radiogroup);
+                        break;
+                    default:
+                        convertView = mInflater.inflate(R.layout.short_answer_listview, null);
+                        holder.textView = (TextView)convertView.findViewById(R.id.question);
                         break;
                 }
                 convertView.setTag(holder);

@@ -50,6 +50,7 @@ public class SurveyAdapter extends BaseAdapter {
         if (convertView == null) {
             holder = new ViewHolder();
             convertView = mInflater.inflate(R.layout.survey_listview, null);
+            holder.textView = (TextView)convertView.findViewById(R.id.survey);
             convertView.setTag(holder);
         }
         else {

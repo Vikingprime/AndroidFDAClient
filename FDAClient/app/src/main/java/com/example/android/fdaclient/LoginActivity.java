@@ -25,7 +25,6 @@ public class LoginActivity extends Activity implements JSONParser{
     EditText e2;
     TextView error;
     private Intent intent;
-    SurveyAdapter surveyAdapter;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -54,9 +53,12 @@ public class LoginActivity extends Activity implements JSONParser{
         return new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+                intent = new Intent(context,StudyActivity.class);
                 String email = e1.getText().toString();
                 String pass = e2.getText().toString();
-
+                intent.putExtra("email",email);
+                intent.putExtra("password",pass);
                 new LoginAsyncTask(StudyActivity.url,email,pass,(JSONParser)context).execute();
             }
         };
@@ -72,35 +74,16 @@ public class LoginActivity extends Activity implements JSONParser{
     }
 
     public void notValid(){
+        intent = null;
         error.setText(R.string.login_error);
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_login, menu);
-        return true;
-    }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
 
     @Override
     public void parse(JSONObject object) {
         JSONArray surveys=null;
-        intent = new Intent(this,StudyActivity.class);
         try {
             surveys = object.getJSONArray("survey");
             intent.putExtra("JSONString",object.toString());
