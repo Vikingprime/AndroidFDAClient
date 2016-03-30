@@ -12,4 +12,5 @@
     <string name="login_error">Incorrect Login</string>
     <string name="signup_error">Email is already connected to an Account</string>
     <string name="name">Name</string>
+    <string name="submit_button">Submit</string>
 </resources>

@@ -11,6 +11,11 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content" >
     </ListView>
+    <Button
+        android:id="@+id/SubmitButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/submit_button" />
 
 </LinearLayout>
 

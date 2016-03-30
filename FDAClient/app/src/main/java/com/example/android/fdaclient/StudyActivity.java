@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RadioButton;
@@ -27,6 +28,7 @@ public class StudyActivity extends AppCompatActivity implements JSONParser{
     QuestionAdapter mQuestionAdapter;
     SurveyAdapter mSurveyAdapter;
     public static String url = "http://ec2-54-165-195-77.compute-1.amazonaws.com:3000";
+    private Button submitButton;
     String email = "janeDoe@gmail.com";
 
 
@@ -43,8 +45,14 @@ public class StudyActivity extends AppCompatActivity implements JSONParser{
             e.printStackTrace();
         }
         mListView = (ListView) findViewById(R.id.survey_list);
+        submitButton = (Button) findViewById(R.id.SignUpButton);
+        submitButton.setOnClickListener(makeOnClickListener());
         initializeSurveyFields(object);
 
+    }
+
+    private View.OnClickListener makeOnClickListener() {
+        return View.OnClickListener;
     }
 
     private void initializeQuestionFields(ArrayList<Question> questions) {
