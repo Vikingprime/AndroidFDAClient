@@ -1,8 +1,13 @@
 package com.example.android.fdaclient;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.text.InputType;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -31,8 +36,11 @@ public class StudyActivity extends AppCompatActivity implements JSONParser{
     SurveyAdapter mSurveyAdapter;
     private String email;
     private String password;
-    public static String url = "http://ec2-54-165-195-77.compute-1.amazonaws.com:3000";
+    public static String url = "http://ec2-52-90-83-176.compute-1.amazonaws.com:3000";
     private Button submitButton;
+    private  String lastClickedSurveyID= null;
+    public static String QUESTION_ACTION = "question";
+    public static String SURVEY_ACTION = "survey";
 
 
     @Override
@@ -44,15 +52,24 @@ public class StudyActivity extends AppCompatActivity implements JSONParser{
         email = getIntent().getStringExtra("email");
         password = getIntent().getStringExtra("password");
         JSONObject object=null;
+        String json = getIntent().getStringExtra("JSONString");
         try {
-            object = new JSONObject(getIntent().getStringExtra("JSONString"));
+            if(json!=null)
+            object = new JSONObject(json);
         } catch (JSONException e) {
             e.printStackTrace();
         }
         mListView = (ListView) findViewById(R.id.survey_list);
-        submitButton = (Button) findViewById(R.id.SignUpButton);
+        submitButton = (Button) findViewById(R.id.SubmitButton);
         submitButton.setOnClickListener(makeOnClickListener());
+        submitButton.setVisibility(View.GONE);
+        if(object!=null)
         initializeSurveyFields(object);
+
+        AlarmManager alarmMgr = (AlarmManager)getSystemService(ALARM_SERVICE);
+        Intent intent = new Intent(this, ShortTimeEntryReceiver.class);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        alarmMgr.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), 10 * 1000, pendingIntent);
 
     }
 
@@ -61,21 +78,51 @@ public class StudyActivity extends AppCompatActivity implements JSONParser{
 
             @Override
             public void onClick(View v) {
+
+                Log.d("TrySend","Will try sending");
+                boolean valid = true;
+                JSONArray answers = new JSONArray();
                 String json;
                 for(int i=0;i<mQuestionAdapter.getCount();i++) {
-                    String answer= ((EditText)
-                            (getViewByPosition(i,mListView).findViewById(R.id.answer))).getText().toString();
-
-                    if (((Question) mQuestionAdapter.getItem(i)).getType() == "Txt") {
-                        json = i + answer;
-                        sendResults(json);
+                    String answer = null;
+                    Log.d("TrySend","Question Type is: "+((Question) mQuestionAdapter.getItem(i)).getType());
+                    if (((Question) mQuestionAdapter.getItem(i)).getType().equals("Txt")) {
+                        answer= ((EditText)
+                                (getViewByPosition(i,mListView).findViewById(R.id.answer))).getText().toString();
                     }
+                    else if(((Question) mQuestionAdapter.getItem(i)).getType().equals("Mc")){
+                        RadioGroup rGroup = ((RadioGroup)(getViewByPosition(i,mListView).findViewById(R.id.radiogroup)));
+                        int radioButtonID = rGroup.getCheckedRadioButtonId();
+                        Log.d("RADIO","RADIOID "+radioButtonID);
+                        RadioButton radioButton = (RadioButton) rGroup.findViewById(radioButtonID);
+                        if(radioButton!=null)
+                        answer = radioButton.getText().toString();
+                    }
+                    else if(((Question) mQuestionAdapter.getItem(i)).getType().equals("Num")){
+                        answer= ((EditText)
+                                (getViewByPosition(i,mListView).findViewById(R.id.answer))).getText().toString();
+                    }
+                    else {
+                        valid = false;
+                        break;
+                    }
+                    if(answers==null){
+                        valid = false;
+                        break;
+                    }
+                    answers.put(answer);
                 }
+                if(valid) {
+                    sendResults(lastClickedSurveyID, answers);
+                   onBackPressed();
+                }
+                else
+                    LoginActivity.makeToast(getBaseContext(),"Make sure to answer all Questions");
             }
         };
     }
-    public void sendResults(String json){
-        new sendResult(url,json).execute();
+    public void sendResults(String id,JSONArray answers){
+        new sendResult(url,id,answers,password,email).execute();
     }
 
     public View getViewByPosition(int pos, ListView listView) {
@@ -92,6 +139,7 @@ public class StudyActivity extends AppCompatActivity implements JSONParser{
 
     private void initializeQuestionFields(ArrayList<Question> questions) {
         mQuestionAdapter = new QuestionAdapter();
+        submitButton.setVisibility(View.VISIBLE);
         mQuestionAdapter.setQuestions(questions);
         mListView.setAdapter(mQuestionAdapter);
     }
@@ -121,18 +169,29 @@ public class StudyActivity extends AppCompatActivity implements JSONParser{
         return new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                makeRequest(((Survey)(mSurveyAdapter.getItem(position))).getSurveyID(),email,password);
+                lastClickedSurveyID = ((Survey)(mSurveyAdapter.getItem(position))).getSurveyID();
+                makeRequest(lastClickedSurveyID,email,password);
             }
         };
     }
 
     private void makeRequest(String surveyID,String email,String password){
         new GetJSONAsyncTask(url,email,surveyID,password,this).execute();
-
     }
 
     @Override
-    public void parse(JSONObject object) {
+    public void parse(JSONObject object, String action) {
+       if(action.equals(QUESTION_ACTION)){
+           getQuestions(object);
+       }
+        else if(action.equals(SURVEY_ACTION)){
+           //TODO:FIX THIS FOR CONCURRENCY
+           if(mQuestionAdapter==null)
+            initializeSurveyFields(object);
+       }
+
+    }
+    private void getQuestions(JSONObject object){
         ArrayList<Question> questionList = new ArrayList<Question>();
         try {
             JSONArray Questions = object.getJSONArray("questions");
@@ -149,7 +208,19 @@ public class StudyActivity extends AppCompatActivity implements JSONParser{
             e.printStackTrace();
         }
         initializeQuestionFields(questionList);
+    }
 
+    @Override
+    public void onBackPressed()
+    {
+        if(mQuestionAdapter==null)
+        super.onBackPressed();
+
+        else {
+            mQuestionAdapter = null;
+            submitButton.setVisibility(View.GONE);
+            new ValidationAsyncTask(StudyActivity.url,email,password,(JSONParser)this).execute();
+        }
     }
 
     private class QuestionAdapter extends BaseAdapter {
@@ -161,6 +232,7 @@ public class StudyActivity extends AppCompatActivity implements JSONParser{
         private final int short_Answer_Question = 0;
         private final int multiple_Choice_Question = 1;
         private final int check_box_Question = 2;
+        private final int num_Question = 3;
 
 
         public QuestionAdapter() {
@@ -181,6 +253,9 @@ public class StudyActivity extends AppCompatActivity implements JSONParser{
             }
             else if(type.equals("Mc")){
               return multiple_Choice_Question;
+          }
+           else if(type.equals("Num")){
+              return num_Question;
           }
             else {
               return check_box_Question;
@@ -218,6 +293,8 @@ public class StudyActivity extends AppCompatActivity implements JSONParser{
                     case short_Answer_Question:
                         convertView = mInflater.inflate(R.layout.short_answer_listview, null);
                         holder.textView = (TextView)convertView.findViewById(R.id.question);
+                        holder.edit = (EditText) convertView.findViewById(R.id.answer);
+                        holder.edit.setInputType(InputType.TYPE_CLASS_TEXT);
                         holder.rGroup = null;
                         break;
                     case multiple_Choice_Question:
@@ -225,6 +302,12 @@ public class StudyActivity extends AppCompatActivity implements JSONParser{
                         holder.textView = (TextView) convertView.findViewById(R.id.MCquestion);
                         holder.rGroup = (RadioGroup)convertView.findViewById(R.id.radiogroup);
                         break;
+                    //TODO: CHANGE TO ALLOW FOR NUM QUESTIONS
+                    case num_Question:
+                        convertView = mInflater.inflate(R.layout.short_answer_listview,null);
+                        holder.textView = (TextView)convertView.findViewById(R.id.question);
+                        holder.edit = (EditText) convertView.findViewById(R.id.answer);
+                        holder.edit.setInputType(InputType.TYPE_CLASS_NUMBER);
                     default:
                         convertView = mInflater.inflate(R.layout.short_answer_listview, null);
                         holder.textView = (TextView)convertView.findViewById(R.id.question);
@@ -236,20 +319,18 @@ public class StudyActivity extends AppCompatActivity implements JSONParser{
             }
             holder.textView.setText(mQuestions.get(position).getPrompt());
             if(holder.rGroup!=null && holder.buttonCreated==false){
-                LinearLayout linlayout = new LinearLayout(StudyActivity.this);
-                linlayout.setOrientation(linlayout.VERTICAL);
                int index =  mQuestions.get(position).getAnswers().length();
                 for (int i = 0; i < index; i++) {
                     RadioButton rdbtn = new RadioButton(StudyActivity.this);
-               //     rdbtn.setId(View.generateViewId());
                     try {
                         rdbtn.setText(mQuestions.get(position).getAnswers().getString(i));
                     }catch(Exception e){
                         rdbtn.setText("Null Question");
                     }
-                    linlayout.addView(rdbtn);
+                    holder.rGroup.setPadding(0,80,0,0);
+                    holder.rGroup.addView(rdbtn);
                 }
-                holder.rGroup.addView(linlayout);
+             //   holder.rGroup.addView(linlayout);
                 holder.buttonCreated=true;
 
             }
@@ -260,8 +341,25 @@ public class StudyActivity extends AppCompatActivity implements JSONParser{
 
     public static class ViewHolder {
         public TextView textView;
+        public EditText edit;
         public RadioGroup rGroup;
         public boolean buttonCreated;
+    }
+
+    public class ShortTimeEntryReceiver extends BroadcastReceiver {
+
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+
+            try {
+                if(mQuestionAdapter==null)
+                new ValidationAsyncTask(StudyActivity.url,email,password,(JSONParser)StudyActivity.this).execute();
+            } catch (Exception e) {
+                e.printStackTrace();
+
+            }
+        }
     }
 
 }

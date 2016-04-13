@@ -3,6 +3,8 @@ package com.example.android.fdaclient;
 import android.os.AsyncTask;
 import android.util.Log;
 
+import org.json.JSONArray;
+
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
@@ -13,11 +15,17 @@ import java.net.URL;
  */
 public class sendResult extends AsyncTask<Void, Void, Void> {
     private String mUrl;
-    private String mAnswers;
+    private JSONArray mAnswers;
+    private String id;
+    private String mPassword;
+    private String mEmail;
 
-    public sendResult(String url, String answers) {
+    public sendResult(String url,String surveyID, JSONArray answers, String password, String email) {
         mUrl = url;
         mAnswers = answers;
+        id = surveyID;
+        mPassword = password;
+        mEmail = email;
     }
 
     @Override
@@ -30,7 +38,11 @@ public class sendResult extends AsyncTask<Void, Void, Void> {
             con.setRequestMethod("POST");
 
             //add request header
-            con.setRequestProperty("answer", mAnswers);
+            Log.d("SurveyId",id);
+            con.setRequestProperty("surveyID",id);
+            con.setRequestProperty("answer", mAnswers.toString());
+            con.setRequestProperty("email",mEmail);
+            con.setRequestProperty("password",mPassword);
 
             int responseCode = con.getResponseCode();
 

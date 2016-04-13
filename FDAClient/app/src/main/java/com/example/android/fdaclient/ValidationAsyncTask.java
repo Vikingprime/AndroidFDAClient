@@ -13,7 +13,7 @@ import java.net.URL;
 /**
  * Created by Vikingprime on 3/27/2016.
  */
-public class LoginAsyncTask extends AsyncTask<Void,Void,String>{
+public class ValidationAsyncTask extends AsyncTask<Void,Void,String>{
 
 
     private String mUrl;
@@ -21,7 +21,7 @@ public class LoginAsyncTask extends AsyncTask<Void,Void,String>{
     private String mPassword;
     private JSONParser mParser;
 
-    public LoginAsyncTask(String url, String email,String password, JSONParser surveyParser){
+    public ValidationAsyncTask(String url, String email, String password, JSONParser surveyParser){
         mUrl = url;
         mEmail = email;
         mPassword = password;
@@ -35,7 +35,7 @@ public class LoginAsyncTask extends AsyncTask<Void,Void,String>{
             HttpURLConnection con = (HttpURLConnection) url.openConnection();
             // optional default is GET
             con.setRequestMethod("POST");
-
+            Log.d("About to Request","REQUESTING");
             //add request header
             con.setRequestProperty("email", mEmail);
             con.setRequestProperty("password",mPassword);
@@ -72,7 +72,7 @@ public class LoginAsyncTask extends AsyncTask<Void,Void,String>{
         }catch(Exception e){
             e.printStackTrace();
         }
-        mParser.parse(jsonObj);
+        mParser.parse(jsonObj,StudyActivity.SURVEY_ACTION);
     }
 
 }

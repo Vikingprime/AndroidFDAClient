@@ -75,6 +75,6 @@ public class GetJSONAsyncTask extends AsyncTask<Void, Void, String> {
         }catch(Exception e){
            e.printStackTrace();
         }
-        mParser.parse(jsonObj);
+        mParser.parse(jsonObj,StudyActivity.QUESTION_ACTION);
     }
 }

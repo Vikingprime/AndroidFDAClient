@@ -4,19 +4,15 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.util.ArrayList;
 
 public class LoginActivity extends Activity implements JSONParser{
     Button Login;
@@ -34,6 +30,8 @@ public class LoginActivity extends Activity implements JSONParser{
         e1 = (EditText) findViewById(R.id.username);
         e2 = (EditText) findViewById(R.id.pass);
         error = (TextView) findViewById(R.id.wrongLogin);
+        e1.setText("");
+        e2.setText("");
 
         Login.setOnClickListener(makeLoginOnClickListener(this));
         newUser.setOnClickListener(makeNewUserOnClickListener(this));
@@ -58,8 +56,8 @@ public class LoginActivity extends Activity implements JSONParser{
                 String email = e1.getText().toString();
                 String pass = e2.getText().toString();
                 intent.putExtra("email",email);
-                intent.putExtra("password",pass);
-                new LoginAsyncTask(StudyActivity.url,email,pass,(JSONParser)context).execute();
+                intent.putExtra("password", pass);
+                new ValidationAsyncTask(StudyActivity.url,email,pass,(JSONParser)context).execute();
             }
         };
     }
@@ -82,34 +80,26 @@ public class LoginActivity extends Activity implements JSONParser{
 
 
     @Override
-    public void parse(JSONObject object) {
+    public void parse(JSONObject object,String action) {
         JSONArray surveys=null;
+        boolean loggedIn = false;
         try {
             surveys = object.getJSONArray("survey");
+            String logged = object.getString("login");
+            if(logged!=null){
+                loggedIn = true;
+            }
             intent.putExtra("JSONString",object.toString());
         } catch (JSONException e) {
             e.printStackTrace();
         }
 
-       isValid(!(surveys==null || surveys.length()==0));
+       isValid(loggedIn);
 
-//        ArrayList<Survey> surveyList = new ArrayList<>();
-//        try {
-//            JSONArray Surveys = object.getJSONArray("survey");
-//            for(int i = 0; i<surveyList.size();i++){
-//                String name = ((JSONObject) Surveys.get(i)).getString("name");
-//                String id = ((JSONObject) Surveys.get(i)).getString("id");
-//                surveyList.add(new Survey(name,id));
-//            }
-//            if(Surveys.length()==0){
-//                Log.d("SURVEYS",Surveys.toString());
-//                isValid(false);
-//            }
-//            else {
-//                isValid(true);
-//            }
-//        } catch (JSONException e) {
-//            e.printStackTrace();
-//        }
+
+    }
+
+    public static void makeToast(Context context,String text){
+        Toast.makeText(context,text,Toast.LENGTH_SHORT).show();
     }
 }
