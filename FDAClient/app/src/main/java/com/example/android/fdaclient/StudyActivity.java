@@ -1,10 +1,6 @@
 package com.example.android.fdaclient;
 
-import android.app.AlarmManager;
-import android.app.PendingIntent;
-import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.text.InputType;
@@ -66,11 +62,6 @@ public class StudyActivity extends AppCompatActivity implements JSONParser{
         if(object!=null)
         initializeSurveyFields(object);
 
-        AlarmManager alarmMgr = (AlarmManager)getSystemService(ALARM_SERVICE);
-        Intent intent = new Intent(this, ShortTimeEntryReceiver.class);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-        alarmMgr.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), 10 * 1000, pendingIntent);
-
     }
 
     private View.OnClickListener makeOnClickListener() {
@@ -114,7 +105,7 @@ public class StudyActivity extends AppCompatActivity implements JSONParser{
                 }
                 if(valid) {
                     sendResults(lastClickedSurveyID, answers);
-                   onBackPressed();
+                    onBackPressed();
                 }
                 else
                     LoginActivity.makeToast(getBaseContext(),"Make sure to answer all Questions");
@@ -185,8 +176,6 @@ public class StudyActivity extends AppCompatActivity implements JSONParser{
            getQuestions(object);
        }
         else if(action.equals(SURVEY_ACTION)){
-           //TODO:FIX THIS FOR CONCURRENCY
-           if(mQuestionAdapter==null)
             initializeSurveyFields(object);
        }
 
@@ -344,22 +333,6 @@ public class StudyActivity extends AppCompatActivity implements JSONParser{
         public EditText edit;
         public RadioGroup rGroup;
         public boolean buttonCreated;
-    }
-
-    public class ShortTimeEntryReceiver extends BroadcastReceiver {
-
-
-        @Override
-        public void onReceive(Context context, Intent intent) {
-
-            try {
-                if(mQuestionAdapter==null)
-                new ValidationAsyncTask(StudyActivity.url,email,password,(JSONParser)StudyActivity.this).execute();
-            } catch (Exception e) {
-                e.printStackTrace();
-
-            }
-        }
     }
 
 }
