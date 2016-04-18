@@ -41,7 +41,8 @@ public class sendResult extends AsyncTask<Void, Void, Void> {
             //add request header
             Log.d("SurveyId", id);
             con.setRequestProperty("surveyID",id);
-            con.setRequestProperty("answer", mAnswers.toString());
+            String jsonString = mAnswers.toString().replace("\"","\\\"");
+            con.setRequestProperty("answer", jsonString);
             Log.d("ANSWER: ",mAnswers.toString());
             con.setRequestProperty("email",mEmail);
             con.setRequestProperty("password",mPassword);
