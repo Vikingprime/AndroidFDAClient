@@ -13,4 +13,5 @@
     <string name="signup_error">Email is already connected to an Account</string>
     <string name="name">Name</string>
     <string name="submit_button">Submit</string>
+    <string name="noSurvey">No Surveys Available</string>
 </resources>

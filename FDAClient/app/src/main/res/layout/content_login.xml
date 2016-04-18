@@ -35,8 +35,8 @@
         android:id="@+id/createUser"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textSize="8dp"
-        android:layout_marginLeft="140dp"
+        android:textSize="15dp"
+        android:layout_marginLeft="100dp"
         android:text="@string/noAccount"
         android:clickable="true"/>
     <TextView

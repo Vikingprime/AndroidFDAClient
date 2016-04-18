@@ -4,6 +4,7 @@ import android.os.AsyncTask;
 import android.util.Log;
 
 import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -38,9 +39,10 @@ public class sendResult extends AsyncTask<Void, Void, Void> {
             con.setRequestMethod("POST");
 
             //add request header
-            Log.d("SurveyId",id);
+            Log.d("SurveyId", id);
             con.setRequestProperty("surveyID",id);
             con.setRequestProperty("answer", mAnswers.toString());
+            Log.d("ANSWER: ",mAnswers.toString());
             con.setRequestProperty("email",mEmail);
             con.setRequestProperty("password",mPassword);
 

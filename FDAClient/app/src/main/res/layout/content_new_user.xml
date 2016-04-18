@@ -11,7 +11,7 @@
         android:layout_marginTop="20dp"
         android:ems="10"
         android:hint="@string/name"
-        android:inputType="text|textMultiLine|textUri" >
+        android:inputType="text" >
     </EditText>
     <EditText
         android:id="@+id/Email"
@@ -20,7 +20,7 @@
         android:layout_marginTop="20dp"
         android:ems="10"
         android:hint="@string/email"
-        android:inputType="text|textMultiLine|textUri" >
+        android:inputType="textEmailAddress" >
     </EditText>
     <EditText
         android:id="@+id/Password"
@@ -29,7 +29,7 @@
         android:layout_marginTop="20dp"
         android:ems="10"
         android:hint="@string/password"
-        android:inputType="text|textMultiLine|textUri" >
+        android:inputType="textPassword">
     </EditText>
 
     <Button
@@ -44,10 +44,11 @@
         android:id="@+id/badSignUp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textSize="10dp"
+        android:textSize="13dp"
         android:textColor="@color/red"
         android:layout_marginTop="50dp"
-        android:layout_marginLeft="120dp"/>
+        android:layout_marginLeft="140dp"
+        android:text="Incorrect Login"/>
 
     <FrameLayout
         android:layout_width="match_parent"

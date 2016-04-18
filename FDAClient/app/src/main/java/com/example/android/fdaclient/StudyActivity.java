@@ -28,6 +28,7 @@ public class StudyActivity extends AppCompatActivity implements JSONParser{
     private JSONObject json = new JSONObject();
 
     ListView mListView;
+    TextView NoSurvey;
     QuestionAdapter mQuestionAdapter;
     SurveyAdapter mSurveyAdapter;
     private String email;
@@ -59,6 +60,7 @@ public class StudyActivity extends AppCompatActivity implements JSONParser{
         submitButton = (Button) findViewById(R.id.SubmitButton);
         submitButton.setOnClickListener(makeOnClickListener());
         submitButton.setVisibility(View.GONE);
+        NoSurvey = (TextView) findViewById(R.id.NoSurvey);
         if(object!=null)
         initializeSurveyFields(object);
 
@@ -108,7 +110,7 @@ public class StudyActivity extends AppCompatActivity implements JSONParser{
                     onBackPressed();
                 }
                 else
-                    LoginActivity.makeToast(getBaseContext(),"Make sure to answer all Questions");
+                    LoginActivity.makeToast(StudyActivity.this,"Make sure to answer all Questions");
             }
         };
     }
@@ -152,6 +154,14 @@ public class StudyActivity extends AppCompatActivity implements JSONParser{
         }
         mSurveyAdapter = new SurveyAdapter(surveyList,(LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE));
         mListView.setAdapter(mSurveyAdapter);
+        if(mSurveyAdapter.getCount()==0){
+            NoSurvey.setVisibility(View.VISIBLE);
+            mListView.setVisibility(View.GONE);
+        }
+        else {
+            NoSurvey.setVisibility(View.GONE);
+            mListView.setVisibility(View.VISIBLE);
+        }
         mListView.setOnItemClickListener(makeOnItemClickListener());
 
     }
@@ -291,12 +301,12 @@ public class StudyActivity extends AppCompatActivity implements JSONParser{
                         holder.textView = (TextView) convertView.findViewById(R.id.MCquestion);
                         holder.rGroup = (RadioGroup)convertView.findViewById(R.id.radiogroup);
                         break;
-                    //TODO: CHANGE TO ALLOW FOR NUM QUESTIONS
                     case num_Question:
                         convertView = mInflater.inflate(R.layout.short_answer_listview,null);
                         holder.textView = (TextView)convertView.findViewById(R.id.question);
                         holder.edit = (EditText) convertView.findViewById(R.id.answer);
                         holder.edit.setInputType(InputType.TYPE_CLASS_NUMBER);
+                        holder.rGroup = null;
                     default:
                         convertView = mInflater.inflate(R.layout.short_answer_listview, null);
                         holder.textView = (TextView)convertView.findViewById(R.id.question);

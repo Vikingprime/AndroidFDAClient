@@ -9,12 +9,21 @@
     <ListView
         android:id="@+id/survey_list"
         android:layout_width="match_parent"
-        android:layout_height="445dp" >
+        android:layout_height="470dp" >
     </ListView>
+    <TextView
+        android:id="@+id/NoSurvey"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginLeft="70dp"
+        android:layout_marginTop="100dp"
+        android:textSize="18dp"
+        android:text="@string/noSurvey"/>
     <Button
         android:id="@+id/SubmitButton"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="10dp"
         android:layout_weight="0.05"
         android:text="@string/submit_button" />
 
