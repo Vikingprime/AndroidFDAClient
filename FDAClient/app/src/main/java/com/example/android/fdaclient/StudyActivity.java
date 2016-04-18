@@ -99,7 +99,7 @@ public class StudyActivity extends AppCompatActivity implements JSONParser{
                         valid = false;
                         break;
                     }
-                    if(answer==null){
+                    if(answer==null || answer.equals("")){
                         valid = false;
                         break;
                     }
