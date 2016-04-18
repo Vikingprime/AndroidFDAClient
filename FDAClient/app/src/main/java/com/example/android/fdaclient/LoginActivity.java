@@ -87,7 +87,7 @@ public class LoginActivity extends Activity implements JSONParser{
             surveys = object.getJSONArray("survey");
             String logged = object.getString("login");
             if(logged!=null){
-                loggedIn = true;
+                loggedIn = Boolean.parseBoolean(logged);
             }
             intent.putExtra("JSONString",object.toString());
         } catch (JSONException e) {
