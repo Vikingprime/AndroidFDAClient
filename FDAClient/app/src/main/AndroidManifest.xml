@@ -3,6 +3,13 @@
     package="com.example.android.fdaclient" >
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
+    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
+    <permission android:protectionLevel="signature"
+        android:name="com.example.android.fdaclient.C2D_MESSAGE" />
+    <uses-permission android:name="com.example.android.fdaclient.C2D_MESSAGE" />
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -51,7 +58,7 @@
                 <!--
                 IMPORTANT: Change "com.parse.starter" to match your app's package name.
                 -->
-                <category android:name="com.parse.starter" />
+                <category android:name="com.example.android.fdaclient" />
             </intent-filter>
         </receiver>
 
@@ -59,7 +66,7 @@
         IMPORTANT: Change "YOUR_SENDER_ID" to your GCM Sender Id.
         -->
         <meta-data android:name="com.example.android.fdaclient"
-            android:value="id:YOUR_SENDER_ID" />;
+            android:value="id:520610173754" />;
     </application>
 
 </manifest>

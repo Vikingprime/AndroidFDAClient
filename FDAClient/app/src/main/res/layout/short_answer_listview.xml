@@ -7,15 +7,15 @@
         android:id="@+id/question"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textSize="10dp"
+        android:textSize="14dp"
         android:layout_marginTop="50dp"
-        android:layout_marginLeft="120dp"/>
+        android:layout_marginLeft="140dp"/>
 
     <EditText
         android:id="@+id/answer"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="18dp"
         android:layout_gravity="center"
         android:ems="10"
         android:inputType="text|textMultiLine|textUri" >

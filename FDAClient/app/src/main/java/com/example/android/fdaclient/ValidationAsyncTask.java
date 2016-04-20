@@ -7,6 +7,7 @@ import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.lang.ref.WeakReference;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
@@ -19,13 +20,13 @@ public class ValidationAsyncTask extends AsyncTask<Void,Void,String>{
     private String mUrl;
     private String mEmail;
     private String mPassword;
-    private JSONParser mParser;
+    private WeakReference<JSONParser> mParser;
 
     public ValidationAsyncTask(String url, String email, String password, JSONParser surveyParser){
         mUrl = url;
         mEmail = email;
         mPassword = password;
-        mParser= surveyParser;
+        mParser= new WeakReference<JSONParser>(surveyParser);
     }
     @Override
     protected String doInBackground(Void... params) {
@@ -72,7 +73,12 @@ public class ValidationAsyncTask extends AsyncTask<Void,Void,String>{
         }catch(Exception e){
             e.printStackTrace();
         }
-        mParser.parse(jsonObj,StudyActivity.SURVEY_ACTION);
+        JSONParser Parse=null;
+        if(mParser.get()!=null){
+            Parse = mParser.get();
+        }
+        if(Parse!=null)
+        Parse.parse(jsonObj,StudyActivity.SURVEY_ACTION);
     }
 
 }

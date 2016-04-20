@@ -7,6 +7,7 @@ import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.lang.ref.WeakReference;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
@@ -17,14 +18,14 @@ public class GetJSONAsyncTask extends AsyncTask<Void, Void, String> {
 
     private String mUrl;
     private String mEmail;
-    private JSONParser mParser;
+    private WeakReference<JSONParser> mParser;
     private String surveyID;
     private String mPassword;
 
     public GetJSONAsyncTask(String url, String email,String id,String password, JSONParser parser){
         mUrl = url;
         mEmail = email;
-        mParser = parser;
+        mParser = new WeakReference<JSONParser>(parser);
         surveyID = id;
         mPassword = password;
     }
@@ -75,6 +76,11 @@ public class GetJSONAsyncTask extends AsyncTask<Void, Void, String> {
         }catch(Exception e){
            e.printStackTrace();
         }
-        mParser.parse(jsonObj,StudyActivity.QUESTION_ACTION);
+        JSONParser Parse=null;
+        if(mParser.get()!=null){
+            Parse = mParser.get();
+        }
+        if(Parse!=null)
+        Parse.parse(jsonObj,StudyActivity.QUESTION_ACTION);
     }
 }

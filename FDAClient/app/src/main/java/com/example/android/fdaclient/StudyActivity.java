@@ -1,11 +1,16 @@
 package com.example.android.fdaclient;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.text.InputType;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -26,7 +31,8 @@ import java.util.ArrayList;
 
 public class StudyActivity extends AppCompatActivity implements JSONParser{
     private JSONObject json = new JSONObject();
-
+    Toolbar mToolbar;
+    Button Logout;
     ListView mListView;
     TextView NoSurvey;
     QuestionAdapter mQuestionAdapter;
@@ -45,7 +51,8 @@ public class StudyActivity extends AppCompatActivity implements JSONParser{
         super.onCreate(savedInstanceState);
         Log.d("TAG", "ONCREATE AFTER HARDCODE");
         setContentView(R.layout.activity_study);
-
+        mToolbar = (Toolbar)findViewById(R.id.toolbar);
+        mToolbar.setTitle("FDASurvey");
         email = getIntent().getStringExtra("email");
         password = getIntent().getStringExtra("password");
         JSONObject object=null;
@@ -59,11 +66,29 @@ public class StudyActivity extends AppCompatActivity implements JSONParser{
         mListView = (ListView) findViewById(R.id.survey_list);
         submitButton = (Button) findViewById(R.id.SubmitButton);
         submitButton.setOnClickListener(makeOnClickListener());
+        Logout = (Button) findViewById(R.id.Logout);
+        Logout.setOnClickListener(makeLogoutOnClickListener());
         submitButton.setVisibility(View.GONE);
         NoSurvey = (TextView) findViewById(R.id.NoSurvey);
         if(object!=null)
         initializeSurveyFields(object);
 
+        else {
+            NoSurvey.setVisibility(View.VISIBLE);
+            mListView.setVisibility(View.GONE);
+        }
+
+    }
+
+    private View.OnClickListener makeLogoutOnClickListener() {
+        return new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(StudyActivity.this,LoginActivity.class);
+                startActivity(intent);
+            }
+        };
     }
 
     private View.OnClickListener makeOnClickListener() {
@@ -71,7 +96,6 @@ public class StudyActivity extends AppCompatActivity implements JSONParser{
 
             @Override
             public void onClick(View v) {
-
                 Log.d("TrySend","Will try sending");
                 boolean valid = true;
                 JSONArray answers = new JSONArray();
@@ -109,8 +133,10 @@ public class StudyActivity extends AppCompatActivity implements JSONParser{
                     sendResults(lastClickedSurveyID, answers);
                     onBackPressed();
                 }
-                else
-                    LoginActivity.makeToast(StudyActivity.this,"Make sure to answer all Questions");
+                else {
+                    LoginActivity.makeToast(StudyActivity.this, "Make sure to answer all Questions");
+                }
+
             }
         };
     }
@@ -165,7 +191,7 @@ public class StudyActivity extends AppCompatActivity implements JSONParser{
         mListView.setOnItemClickListener(makeOnItemClickListener());
 
     }
-
+    //TODO:MAKE SURE NO CONCURRENCY ISSUES WITH LOGOUT AND CLICK AT SAME TIME
     private AdapterView.OnItemClickListener makeOnItemClickListener() {
         return new AdapterView.OnItemClickListener() {
             @Override
@@ -188,7 +214,6 @@ public class StudyActivity extends AppCompatActivity implements JSONParser{
         else if(action.equals(SURVEY_ACTION)){
             initializeSurveyFields(object);
        }
-
     }
     private void getQuestions(JSONObject object){
         ArrayList<Question> questionList = new ArrayList<Question>();
@@ -257,13 +282,14 @@ public class StudyActivity extends AppCompatActivity implements JSONParser{
               return num_Question;
           }
             else {
+
               return check_box_Question;
           }
         }
 
         @Override
         public int getViewTypeCount() {
-            return TYPE_MAX_COUNT;
+            return TYPE_MAX_COUNT + 1;
         }
 
         @Override
